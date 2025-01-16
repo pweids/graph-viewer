@@ -1,0 +1,2 @@
+#! /bin/bash
+/Users/paulweidinger/dev/tmp/venv/bin/streamlit run $(pwd)/make_node_graph.py
