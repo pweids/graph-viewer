@@ -124,6 +124,26 @@ def get_workflow_graph(token, workflow_id):
     else:
         return None
 
+def get_group_subgraphs(graph_data):
+    """
+    Return a list of (group_node_id, group_node_name, group_node_workflow_dict).
+    Each entry corresponds to a node with isGroup=True and a valid groupNodeData.workflow.
+    """
+    subgraphs = []
+    nodes = graph_data.get("nodes", [])
+    for node in nodes:
+        if node["data"].get("isGroup") and "groupNodeData" in node["data"]:
+            gdata = node["data"]["groupNodeData"].get("workflow")
+            if gdata:
+                subgraphs.append(
+                    (
+                        node["id"],
+                        node["data"].get("name", "Untitled group"),
+                        gdata
+                    )
+                )
+    return subgraphs
+
 def filter_graph_data(graph_data):
     # Extract and map nodes to the required fields
     filtered_nodes = [
