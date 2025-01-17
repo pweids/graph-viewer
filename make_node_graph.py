@@ -6,7 +6,7 @@ from collections import Counter
 
 def create_node_graph(json_data):
     dot = Digraph("node_graph", format="png")
-    dot.attr(rankdir="LR")
+    dot.attr(rankdir="LR", dpi="300", size="10,10!")
 
     # Collect IDs for duplicates
     node_ids = [node["id"] for node in json_data["nodes"]]
@@ -55,9 +55,9 @@ def create_node_graph(json_data):
         ) or '<tr><td align="left">&nbsp;</td></tr>'
 
         out_rows = "".join(
-            f'<tr><td port="{h_id}" align="left">{label}</td></tr>'
+            f'<tr><td port="{h_id}" align="right">{label}</td></tr>'
             for (h_id, label) in outputs
-        ) or '<tr><td align="left">&nbsp;</td></tr>'
+        ) or '<tr><td align="right">&nbsp;</td></tr>'
 
         label = (
             f'<<table BORDER="1" CELLBORDER="0" CELLSPACING="0">'
@@ -76,15 +76,18 @@ def create_node_graph(json_data):
     # Add edges
     for edge in json_data["edges"]:
         s_node = edge["source"]
-        s_handle = edge["sourceHandle"]
+        s_handle = edge.get("sourceHandle", "NONE")
         t_node = edge["target"]
-        t_handle = edge["targetHandle"]
+        t_handle = edge.get("targetHandle", "NONE")
 
         # Ensure dotted node if source/target node is missing from JSON
         if s_node not in valid_node_ids:
             ensure_dotted_node(s_node)
         if t_node not in valid_node_ids:
             ensure_dotted_node(t_node)
+
+        # Determine if the edge should be dotted
+        edge_style = "dotted" if (s_node not in valid_node_ids or t_node not in valid_node_ids) else "solid"
 
         # Figure out source port
         if s_node in valid_node_ids and s_handle in valid_handles[s_node]:
@@ -101,7 +104,8 @@ def create_node_graph(json_data):
         # Color edge red if the node is valid but the target handle doesn't exist
         edge_color = "red" if (t_node in valid_node_ids and t_handle not in valid_handles[t_node]) else "black"
 
-        dot.edge(from_port, to_port, color=edge_color)
+        # Add the edge with the determined style and color
+        dot.edge(from_port, to_port, color=edge_color, style=edge_style)
 
     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmpfile:
         dot.render(tmpfile.name, cleanup=True)

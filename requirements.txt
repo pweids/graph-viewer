@@ -1,2 +1,4 @@
 graphviz
 streamlit
+requests
+python-dotenv
