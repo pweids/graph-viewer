@@ -11,6 +11,7 @@ SERVICE_NAME="streamlit"
 # Sync excluding venv and .git
 rsync -av \
   --exclude '.git' \
+  --exclude '.gitignore' \
   --exclude 'venv' \
   --exclude '__pycache__' \
   -e "ssh -i $PEM_KEY_PATH" \
